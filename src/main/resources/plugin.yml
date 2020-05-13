@@ -1,0 +1,15 @@
+name: Buildy
+version: @plugin_version@
+author: Offz
+main: com.mineinabyss.buildy.Buildy
+api-version: 1.15
+depend: [WorldGuard, KotlinSpice]
+
+prefix: Buildy
+description: A server build managment tool
+
+commands:
+  buildy:
+    aliases: [buildy]
+    description: The main buildy command
+    usage: /buildy [sub command]
