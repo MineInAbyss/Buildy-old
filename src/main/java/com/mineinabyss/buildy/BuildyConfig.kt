@@ -1,20 +1,25 @@
 package com.mineinabyss.buildy
 
+import com.charleskorn.kaml.Yaml
+import com.mineinabyss.buildy.model.BuildArea
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.messaging.success
+import kotlinx.serialization.Serializable
 import org.bukkit.command.CommandSender
 
 object BuildyConfig {
-//    lateinit var serialized: SerializedBuildyConfig; private set
+    lateinit var serialized: SerializedBuildyConfig; private set
 
-//    @Serializable
-//    data class SerializedBuildyConfig(
-//            val
-//    )
+    val buildAreas get() = serialized.buildAreas
+
+    @Serializable
+    data class SerializedBuildyConfig(
+            val buildAreas: MutableList<BuildArea>
+    )
 
     private fun loadSerializedValues() {
-//        serialized = Yaml.default.parse(SerializedBuildyConfig.serializer(), buildy.config.saveToString())
+        serialized = Yaml.default.parse(SerializedBuildyConfig.serializer(), buildy.config.saveToString())
     }
 
     init {
@@ -22,7 +27,7 @@ object BuildyConfig {
     }
 
     fun saveConfig() {
-//        buildy.config.loadFromString(Yaml.default.stringify(SerializedBuildyConfig.serializer(), serialized))
+        buildy.config.loadFromString(Yaml.default.stringify(SerializedBuildyConfig.serializer(), serialized))
         buildy.saveConfig()
     }
 
