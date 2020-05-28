@@ -122,7 +122,7 @@ shadowJar {
     getArchiveBaseName().set("Buildy")
     getArchiveClassifier().set(null)
 
-    relocate 'com.derongan.minecraft.guiy', "${project.group}.${project.name}.guiy".toLowerCase()
+//    relocate 'com.derongan.minecraft.guiy', "${project.group}.${project.name}.guiy".toLowerCase()
     relocate 'com.mineinabyss.idofront', "${project.group}.${project.name}.idofront".toLowerCase()
 
     minimize {
@@ -138,7 +138,11 @@ processResources {
     }
 }
 
-compileKotlin { kotlinOptions { jvmTarget = "1.8" } }
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 compileTestKotlin { kotlinOptions { jvmTarget = "1.8" } }
 
 //Move into plugins folder

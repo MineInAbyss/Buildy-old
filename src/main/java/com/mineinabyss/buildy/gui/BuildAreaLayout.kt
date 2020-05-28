@@ -1,13 +1,11 @@
 package com.mineinabyss.buildy.gui
 
-import com.derongan.minecraft.guiy.gui.FillableElement
 import com.derongan.minecraft.guiy.gui.Layout
-import com.derongan.minecraft.guiy.gui.ScrollingPallet
 import com.derongan.minecraft.guiy.gui.addAll
 import com.derongan.minecraft.guiy.helpers.toCell
 import com.derongan.minecraft.guiy.kotlin_dsl.button
 import com.derongan.minecraft.guiy.kotlin_dsl.guiyLayout
-import com.derongan.minecraft.guiy.kotlin_dsl.setElement
+import com.derongan.minecraft.guiy.kotlin_dsl.scrollingPallet
 import com.mineinabyss.buildy.BuildyConfig
 import com.mineinabyss.buildy.model.BuildArea
 import com.mineinabyss.idofront.items.editItemMeta
@@ -27,52 +25,60 @@ class BuildAreaLayout(
 ) : Layout() {
     init {
         setElement(0, 0, Material.NAME_TAG.toCell("&6Project leads".color()))
-        setElement(1, 0, ScrollingPallet(8)) {
+        scrollingPallet(8) {
             addAll(this@BuildAreaLayout.buildArea.leads.toPlayerHeads())
-        }
+        }.at(1, 0)
 
-        setElement(0, 1, Material.NAME_TAG.toCell("&7Project members".color()))
-        setElement(1, 1, ScrollingPallet(8)) {
+        Material.NAME_TAG.toCell("&7Project members".color()).at(0, 1)
+        scrollingPallet(8) {
             addAll(this@BuildAreaLayout.buildArea.members.toPlayerHeads())
-        }
+        }.at(1, 1)
 
-        button(1, 5, HeadLib.QUARTZ_L.toCell("Teleport to")) {
+        button(HeadLib.QUARTZ_L.toCell("Teleport to")) {
             player.teleport(buildArea.teleportLoc)
-        }
+        }.at(1, 5)
+
         if (player.hasPermission("buildy.srbuilder")) {
             if (!buildArea.hasLead(player)) {
-                button(6, 5, Material.PAPER.toCell("&6Join as lead".color())) {
+                button(Material.PAPER.toCell("&6Join as lead".color())) {
                     if (!buildArea.hasLead(player)) buildArea.leads += player.uniqueId
                     buildArea.members -= player.uniqueId
-                }
+                }.at(6, 5)
                 if (!buildArea.hasMember(player))
-                    button(5, 5, Material.PAPER.toCell("Join as member")) {
+                    button(Material.PAPER.toCell("Join as member")) {
                         if (!buildArea.hasMember(player)) buildArea.members += player.uniqueId
-                    }
+                    }.at(5, 5)
             }
         } else if (!buildArea.hasMember(player) && !buildArea.hasLead(player))
-            button(6, 5, Material.PAPER.toCell("Request join")) {
+            button(Material.PAPER.toCell("Request join")) {
                 TODO("create request")
-            }
+            }.at(6, 5)
 
         if (buildArea.leads.contains(player.uniqueId))
-            button(7, 5, Material.PAPER.toCell("Edit area")) {
+            button(Material.PAPER.toCell("Edit area")) {
                 mainGUI.setElement(settingsMenu())
-            }
+            }.at(7, 5)
     }
 
     private fun settingsMenu() = guiyLayout {
-        button(2, 5, HeadLib.STONE_L.toCell("&6Update location".color())) {
+        button(HeadLib.STONE_L.toCell("&6Update location".color())) {
             this@BuildAreaLayout.buildArea.teleportLoc = this@BuildAreaLayout.player.location
             BuildyConfig.saveConfig()
-        }
+        }.at(2, 5)
 
-        button(3, 5, HeadLib.WOODEN_PLUS.toCell("&6Set complete".color())) {
+        button(HeadLib.WOODEN_PLUS.toCell("&6Set complete".color())) {
             //TODO toggle button
             val buildArea = this@BuildAreaLayout.buildArea
             buildArea.isComplete = !buildArea.isComplete
             BuildyConfig.saveConfig()
-        }
+        }.at(3, 5)
+
+        button(HeadLib.PLAIN_LIGHT_RED.toCell("&cDelete".color())) {
+            val buildArea = this@BuildAreaLayout.buildArea
+            BuildyConfig.buildAreas.remove(buildArea)
+            this@BuildAreaLayout.player.closeInventory()
+            BuildyConfig.saveConfig()
+        }.at(7, 5)
     }
 }
 
