@@ -1,24 +1,13 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
-    }
-}
-
 plugins {
     id 'java'
     id 'idea'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlin_version"
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
 }
-
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: "kotlin"
 
 group = 'com.mineinabyss'
 version = plugin_version
@@ -71,7 +60,7 @@ repositories {
     maven { url 'https://jitpack.io' } //JitPack
     maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
     maven { url 'https://maven.sk89q.com/repo/' } //WorldGuard/Edit
-    mavenLocal()
+//    mavenLocal()
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -109,13 +98,16 @@ dependencies {
     compileOnly "de.erethon:headlib:3.0.2"
     compileOnly "com.sk89q.worldguard:worldguard-bukkit:7.0.2" //WorldGuard
     compileOnly "com.github.WesJD.AnvilGUI:anvilgui:5e3ab1f721"
-    implementation "org.cultofclang.minecraft:kotlinspice:$kotlin_version+"
+    compileOnly "org.cultofclang.minecraft:kotlinspice:1.3.71+"
 
-    if (useLocalGuiy.toBoolean()) implementation project(':guiy')
+    if (useLocalGuiy.toBoolean()) implementation "com.derongan.minecraft:guiy"
     else implementation "com.derongan.minecraft:guiy:0.1.+"
 
-    if (useLocalIdofront.toBoolean()) implementation project(':idofront')
+    if (useLocalIdofront.toBoolean()) implementation "com.mineinabyss:idofront"
     else implementation "com.mineinabyss:idofront:0.1.+"
+
+    if (project.hasProperty("useLocalKotlinSpice") && useLocalKotlinSpice.toBoolean()) compileOnly "org.cultofclang.minecraft:kotlinspice"
+    else compileOnly "org.cultofclang.minecraft:kotlinspice:1.3.71+"
 }
 
 shadowJar {
@@ -154,3 +146,4 @@ if (project.hasProperty("plugin_path") && plugin_path) {
     }
     build.dependsOn copyJar
 }
+//build.dependsOn gradle.includedBuild('idofront').task(':run')
