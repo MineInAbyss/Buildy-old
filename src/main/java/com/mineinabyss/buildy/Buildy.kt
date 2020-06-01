@@ -1,6 +1,6 @@
 package com.mineinabyss.buildy
 
-import com.derongan.minecraft.guiy.GuiListener
+import com.derongan.minecraft.guiy.helpers.registerGuiyListener
 import org.bukkit.plugin.java.JavaPlugin
 
 /** Gets [Buildy] via Bukkit once, then sends that reference back afterwards */
@@ -15,7 +15,7 @@ class Buildy : JavaPlugin() {
         BuildyConfig
 
         //Register events
-        server.pluginManager.registerEvents(GuiListener(this), this)
+        registerGuiyListener()
 
         //Register commands
         BuildyCommands

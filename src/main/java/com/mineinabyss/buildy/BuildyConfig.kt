@@ -60,3 +60,5 @@ object BuildyConfig {
         sender.success("Successfully reloaded config")
     }
 }
+
+fun getBuildArea(name: String) = BuildyConfig.buildAreas.first { it.regionName == name }
