@@ -1,6 +1,6 @@
 package com.mineinabyss.buildy.gui
 
-import com.derongan.minecraft.guiy.gui.Layout
+import com.derongan.minecraft.guiy.gui.layouts.GridLayout
 import com.derongan.minecraft.guiy.helpers.toCell
 import com.derongan.minecraft.guiy.kotlin_dsl.button
 import com.derongan.minecraft.guiy.kotlin_dsl.guiyLayout
@@ -22,7 +22,7 @@ class BuildAreaLayout(
         private val mainGUI: BuildyGui,
         val player: Player,
         val buildArea: BuildArea
-) : Layout() {
+) : GridLayout() {
     init {
         Material.NAME_TAG.toCell("&6Project leads".color()).at(0, 0)
         scrollingPallet(8) {
@@ -67,7 +67,7 @@ class BuildAreaLayout(
     private fun settingsMenu() = guiyLayout {
         button(HeadLib.STONE_L.toCell("&6Update location".color())) {
             this@BuildAreaLayout.buildArea.teleportLoc = this@BuildAreaLayout.player.location
-            BuildyConfig.saveConfig()
+            BuildyConfig.queueSave()
         }.at(2, 5)
 
         toggle(HeadLib.PLAIN_LIGHT_GREEN.toCell("&6Progress: Open".color()),
@@ -76,22 +76,22 @@ class BuildAreaLayout(
             enabled = buildArea.isComplete
             onClick {
                 buildArea.isComplete = !buildArea.isComplete
-                BuildyConfig.saveConfig()
+                BuildyConfig.queueSave()
             }
         }.at(3, 5)
 
         button(HeadLib.STONE_R.toCell("&6Set region".color())) {
-            //TODO toggle button
             with(this@BuildAreaLayout) {
                 buildArea.changeRegion(player)
             }
         }.at(4, 5)
 
         button(HeadLib.PLAIN_LIGHT_RED.toCell("&cDelete".color())) {
-            val buildArea = this@BuildAreaLayout.buildArea
-            BuildyConfig.buildAreas.remove(buildArea)
-            this@BuildAreaLayout.player.closeInventory()
-            BuildyConfig.saveConfig()
+            with(this@BuildAreaLayout) {
+                BuildyConfig.buildAreas.remove(buildArea)
+                player.closeInventory()
+            }
+            BuildyConfig.queueSave()
         }.at(7, 5)
     }
 }
