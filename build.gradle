@@ -1,152 +1,88 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
-    }
-}
-
 plugins {
     id 'java'
     id 'idea'
+    id 'com.github.johnrengelman.shadow'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'maven-publish'
-    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+    id 'io.github.0ffz.github-packages'
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: "kotlin"
+apply from: 'https://raw.githubusercontent.com/MineInAbyss/shared-gradle/master/common.gradle'
 
 group = 'com.mineinabyss'
 version = plugin_version
 
-if (project.hasProperty("buildNo")) version += ".$buildNo"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-def github_username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-def github_password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-
 repositories {
     mavenCentral()
     jcenter()
-    maven {
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-        content {
-            includeGroup 'org.bukkit'
-            includeGroup 'org.spigotmc'
-        }
-    }
-    maven {
-        name = "MineInAbyss"
-        url = uri("https://maven.pkg.github.com/MineInAbyss/Idofront")
-        credentials {
-            username = github_username
-            password = github_password
-        }
-    }
-    maven {
-        name = "MineInAbyss"
-        url = uri("https://maven.pkg.github.com/MineInAbyss/Guiy")
-        credentials {
-            username = github_username
-            password = github_password
-        }
-    }
-    maven {
-        name = "CultOfClang"
-        url = uri("https://maven.pkg.github.com/CultOfClang/Minecraft/")
-        credentials {
-            username = github_username
-            password = github_password
-        }
-    }
+
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://erethon.de/repo/' } //HeadLib
     maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
-    maven { url 'https://jitpack.io' } //JitPack
     maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
     maven { url 'https://maven.sk89q.com/repo/' } //WorldGuard/Edit
-    mavenLocal()
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    getArchiveClassifier().set('sources')
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    getArchiveClassifier().set('javadoc')
-    from javadoc.destinationDir
+    maven { url 'http://nexus.okkero.com/repository/maven-releases/' }
+    maven { url 'https://jitpack.io' } //JitPack
+    maven githubPackage.invoke("MineInAbyss/guiy")
+    maven githubPackage.invoke("MineInAbyss/Idofront")
+    maven githubPackage.invoke("MineInAbyss/KotlinSpice")
+//    mavenLocal()
 }
 
 publishing {
     repositories {
-        maven {
-            name = "Buildy"
-            url = uri("https://maven.pkg.github.com/MineInAbyss/Buildy")
-            credentials {
-                username = github_username
-                password = github_password
-            }
-        }
+        maven githubPackage.invoke("MineInAbyss/Buildy")
     }
     publications {
         gpr(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
+            from(components.java)
         }
     }
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:$server_version" //Spigot
-    compileOnly "de.erethon:headlib:3.0.2"
+    compileOnly "org.spigotmc:spigot-api:$server_version"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compileOnly "org.cultofclang.minecraft:kotlinspice:$kotlin_version-8"
+
+    implementation "com.okkero.skedule:skedule:1.2.6"
+    implementation 'de.erethon:headlib:3.0.5'
+
+    implementation 'com.derongan.minecraft:guiy:0.1.0-alpha.7'
+    implementation 'com.mineinabyss:idofront:0.3.25'
+
+    compileOnly "de.erethon:headlib:3.0.5"
     compileOnly "com.sk89q.worldguard:worldguard-bukkit:7.0.2" //WorldGuard
     compileOnly "com.github.WesJD.AnvilGUI:anvilgui:5e3ab1f721"
-    implementation "org.cultofclang.minecraft:kotlinspice:$kotlin_version+"
-
-    if (useLocalGuiy.toBoolean()) implementation project(':guiy')
-    else implementation "com.derongan.minecraft:guiy:0.1.+"
-
-    if (useLocalIdofront.toBoolean()) implementation project(':idofront')
-    else implementation "com.mineinabyss:idofront:0.1.+"
 }
+
 
 shadowJar {
     getArchiveBaseName().set("Buildy")
     getArchiveClassifier().set(null)
 
-    relocate 'com.derongan.minecraft.guiy', "${project.group}.${project.name}.guiy".toLowerCase()
-    relocate 'com.mineinabyss.idofront', "${project.group}.${project.name}.idofront".toLowerCase()
+    //TODO not relocating for debugging purposes
+//    relocate 'com.derongan.minecraft.guiy', "${project.group}.${project.name}.guiy".toLowerCase()
+//    relocate 'com.mineinabyss.idofront', "${project.group}.${project.name}.idofront".toLowerCase()
 
     minimize {
-        exclude(dependency('de.erethon:headlib:3.0.2'))
+        exclude(dependency('de.erethon:headlib:3.0.5'))
         exclude(dependency('com.github.WesJD.AnvilGUI:anvilgui:5e3ab1f721'))
     }
 }
 build.dependsOn shadowJar
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        filter ReplaceTokens, tokens: [plugin_version: plugin_version]
+shadowJar {
+    getArchiveClassifier().set(null)
+    relocate 'com.derongan.minecraft.guiy', "com.derongan.minecraft.guiy.${project.group}.${project.name}"
+    relocate 'com.mineinabyss.idofront', "com.mineinabyss.idofront.${project.group}.${project.name}"
+    minimize {
+        exclude(dependency('de.erethon:headlib:.*'))
     }
 }
+build.dependsOn shadowJar
 
 compileKotlin { kotlinOptions { jvmTarget = "1.8" } }
 compileTestKotlin { kotlinOptions { jvmTarget = "1.8" } }
-
-//Move into plugins folder
-if (project.hasProperty("plugin_path") && plugin_path) {
-    println("Copying to plugin directory $plugin_path")
-    task copyJar(type: Copy) {
-        from shadowJar // here it automatically reads jar file produced from jar task
-        into plugin_path
-    }
-    build.dependsOn copyJar
-}

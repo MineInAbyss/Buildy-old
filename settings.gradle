@@ -1,11 +1,14 @@
-rootProject.name = 'Buildy'
-
-if (useLocalGuiy.toBoolean()) {
-    include 'guiy'
-    project(':guiy').projectDir = new File('../guiy')
+pluginManagement {
+    plugins {
+        id 'org.jetbrains.kotlin.jvm' version "$kotlin_version"
+        id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+        id 'com.github.johnrengelman.shadow' version '6.0.0'
+        id 'io.github.0ffz.github-packages' version '1.0.5'
+    }
 }
 
-if (useLocalIdofront.toBoolean()) {
-    include 'idofront'
-    project(':idofront').projectDir = new File('../idofront')
-}
+rootProject.name = 'buildy'
+
+if (useLocalGuiy.toBoolean()) includeBuild '../guiy'
+if (useLocalIdofront.toBoolean()) includeBuild '../idofront'
+if (useLocalKotlinSpice.toBoolean()) includeBuild '../kotlinspice'
